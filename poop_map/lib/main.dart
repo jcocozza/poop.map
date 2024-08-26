@@ -116,7 +116,7 @@ class _MyHomePageState extends State<MyHomePage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Poop Location: ${poopLocation.name}'),
+          title: Text('Poop Location: ${poopLocation.name} - ${poopLocation.locationType.displayName}'),
           content: Text('${poopLocation.name} is rated ${poopLocation.rating} and has been around since ${poopLocation.firstCreated}'),
           actions: <Widget>[
             TextButton(
