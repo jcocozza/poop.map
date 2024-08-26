@@ -111,6 +111,25 @@ class _MyHomePageState extends State<MyHomePage> {
   );
 }
 
+  void _showMarkerInfo(PoopLocation poopLocation) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Poop Location: ${poopLocation.name}'),
+          content: Text('${poopLocation.name} is rated ${poopLocation.rating} and has been around since ${poopLocation.firstCreated}'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Close'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +143,7 @@ class _MyHomePageState extends State<MyHomePage> {
           FlutterMap(
             options: MapOptions(
               initialCenter: const LatLng(51.509364, -0.128928), // Center the map over London
-              initialZoom: 9.2,
+              initialZoom: 19,
               onTap: (tapPosition, point) => setState(() {
                 _showAddPoopLocationDialog(point);
                 //_markerPositions.add(point);
@@ -137,13 +156,16 @@ class _MyHomePageState extends State<MyHomePage> {
               maxNativeZoom: 19, // Scale tiles when the server doesn't support higher zoom levels
               // And many more recommended properties!
             ),
-            CurrentLocationLayer(),
+            CurrentLocationLayer(alignPositionOnUpdate: AlignOnUpdate.always),
             MarkerLayer(
             markers: _poopLocations.map((poopLocation) => Marker(
                 point: poopLocation.location(),
                 width: 80,
                 height: 80,
-                child: const Icon(Icons.location_pin, color: Colors.red, size: 40),
+                child: GestureDetector(
+                  onTap: () => { _showMarkerInfo(poopLocation) },
+                  child: const Icon(Icons.location_pin, color: Colors.red, size: 40),
+                ),
               )).toList(),
             ),
             const RichAttributionWidget( // Include a stylish prebuilt attribution widget that meets all requirments
