@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:poop_map/model/poop_location.dart';
 
 
 void main() {
@@ -33,7 +35,82 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<LatLng> _markerPositions = [];
+  List<PoopLocation> _poopLocations = [];
+
+  void _showAddPoopLocationDialog(LatLng location) async {
+  final _nameController = TextEditingController();
+  final _ratingController = TextEditingController();
+  LocationType _selectedLocationType = LocationType.regular;
+
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Add Poop Location'),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: <Widget>[
+              TextField(
+                controller: _nameController,
+                decoration: const InputDecoration(labelText: 'Name'),
+              ),
+              TextField(
+                controller: _ratingController,
+                decoration: const InputDecoration(labelText: 'Rating'),
+                keyboardType: TextInputType.number,
+              ),
+              DropdownButton<LocationType>(
+                value: _selectedLocationType,
+                items: LocationType.values.map((LocationType locationType) {
+                return DropdownMenuItem<LocationType>(
+                  value: locationType,
+                  child: Text(locationType.displayName),
+                );
+              }).toList(),
+              onChanged: (LocationType? newValue) {
+                setState(() {
+                  _selectedLocationType = newValue!;
+                });
+              })
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('Cancel'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          ElevatedButton(
+            child: const Text('Add'),
+            onPressed: () {
+              final name = _nameController.text;
+              final rating = int.tryParse(_ratingController.text) ?? 0;
+              final locationType = _selectedLocationType;
+
+              if (name.isNotEmpty) {
+                setState(() {
+                  PoopLocation pl = createPoopLocation(
+                    location.latitude,
+                    location.longitude,
+                    rating,
+                    locationType,
+                    name,
+                  );
+                  _poopLocations.add(pl);
+                });
+                Navigator.of(context).pop();
+              }
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +126,8 @@ class _MyHomePageState extends State<MyHomePage> {
               initialCenter: const LatLng(51.509364, -0.128928), // Center the map over London
               initialZoom: 9.2,
               onTap: (tapPosition, point) => setState(() {
-                _markerPositions.add(point);
+                _showAddPoopLocationDialog(point);
+                //_markerPositions.add(point);
               }),
             ),
           children: [
@@ -59,9 +137,10 @@ class _MyHomePageState extends State<MyHomePage> {
               maxNativeZoom: 19, // Scale tiles when the server doesn't support higher zoom levels
               // And many more recommended properties!
             ),
+            CurrentLocationLayer(),
             MarkerLayer(
-            markers: _markerPositions.map((point) => Marker(
-                point: point,
+            markers: _poopLocations.map((poopLocation) => Marker(
+                point: poopLocation.location(),
                 width: 80,
                 height: 80,
                 child: const Icon(Icons.location_pin, color: Colors.red, size: 40),
