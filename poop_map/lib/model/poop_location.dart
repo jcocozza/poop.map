@@ -23,6 +23,12 @@ extension LocationTypeExtension on LocationType {
         return 'other';
     }
   }
+  static LocationType fromString(String value) {
+    return LocationType.values.firstWhere(
+      (type) => type.displayName == value.toLowerCase(),
+      orElse: () => LocationType.other,
+    );
+  }
 }
 
 class PoopLocation {
@@ -47,6 +53,18 @@ class PoopLocation {
   /// return the lat/lng coord
   LatLng location() {
     return LatLng(latitude, longitude);
+  }
+
+  Map<String, Object?> toMap() {
+    return {
+      'uuid': uuid,
+      'latitude': latitude,
+      'longitude': longitude,
+      'rating': rating,
+      'first_created': firstCreated,
+      'location_type': locationType.displayName,
+      'name': name,
+    };
   }
 }
 

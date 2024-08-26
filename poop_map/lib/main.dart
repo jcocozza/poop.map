@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:poop_map/database/db.dart';
 import 'package:poop_map/model/poop_location.dart';
+import 'package:sqflite/sqflite.dart';
 
 
 void main() {
@@ -36,79 +38,101 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   List<PoopLocation> _poopLocations = [];
+  late Future<Database> _databaseFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _databaseFuture = createDatabase();
+    _loadPoopLocations();
+  }
+
+  Future<void> _loadPoopLocations() async {
+    try {
+      final database = await _databaseFuture;
+      final locations = await getAllPoopLocations(database);
+      setState(() {
+        _poopLocations = locations;
+      });
+    } catch (e) {
+      print('Error loading poop locations: $e');
+    }
+  }
 
   void _showAddPoopLocationDialog(LatLng location) async {
-  final _nameController = TextEditingController();
-  final _ratingController = TextEditingController();
-  LocationType _selectedLocationType = LocationType.regular;
+    final _nameController = TextEditingController();
+    final _ratingController = TextEditingController();
+    LocationType _selectedLocationType = LocationType.regular;
 
-  return showDialog<void>(
-    context: context,
-    barrierDismissible: false,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Add Poop Location'),
-        content: SingleChildScrollView(
-          child: ListBody(
-            children: <Widget>[
-              TextField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Name'),
-              ),
-              TextField(
-                controller: _ratingController,
-                decoration: const InputDecoration(labelText: 'Rating'),
-                keyboardType: TextInputType.number,
-              ),
-              DropdownButton<LocationType>(
-                value: _selectedLocationType,
-                items: LocationType.values.map((LocationType locationType) {
-                return DropdownMenuItem<LocationType>(
-                  value: locationType,
-                  child: Text(locationType.displayName),
-                );
-              }).toList(),
-              onChanged: (LocationType? newValue) {
-                setState(() {
-                  _selectedLocationType = newValue!;
-                });
-              })
-            ],
-          ),
-        ),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('Cancel'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          ElevatedButton(
-            child: const Text('Add'),
-            onPressed: () {
-              final name = _nameController.text;
-              final rating = int.tryParse(_ratingController.text) ?? 0;
-              final locationType = _selectedLocationType;
-
-              if (name.isNotEmpty) {
-                setState(() {
-                  PoopLocation pl = createPoopLocation(
-                    location.latitude,
-                    location.longitude,
-                    rating,
-                    locationType,
-                    name,
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Add Poop Location'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                TextField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(labelText: 'Name'),
+                ),
+                TextField(
+                  controller: _ratingController,
+                  decoration: const InputDecoration(labelText: 'Rating'),
+                  keyboardType: TextInputType.number,
+                ),
+                DropdownButton<LocationType>(
+                  value: _selectedLocationType,
+                  items: LocationType.values.map((LocationType locationType) {
+                  return DropdownMenuItem<LocationType>(
+                    value: locationType,
+                    child: Text(locationType.displayName),
                   );
-                  _poopLocations.add(pl);
-                });
-                Navigator.of(context).pop();
-              }
-            },
+                }).toList(),
+                onChanged: (LocationType? newValue) {
+                  setState(() {
+                    _selectedLocationType = newValue!;
+                  });
+                })
+              ],
+            ),
           ),
-        ],
-      );
-    },
-  );
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: const Text('Add'),
+              onPressed: () {
+                final name = _nameController.text;
+                final rating = int.tryParse(_ratingController.text) ?? 0;
+                final locationType = _selectedLocationType;
+
+                if (name.isNotEmpty) {
+                  setState(() async {
+                    PoopLocation pl = createPoopLocation(
+                      location.latitude,
+                      location.longitude,
+                      rating,
+                      locationType,
+                      name,
+                    );
+                    final database = await _databaseFuture;
+                    await insertPoopLocation(database, pl);
+                    _poopLocations.add(pl);
+                  });
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
 }
 
   void _showMarkerInfo(PoopLocation poopLocation) {
@@ -138,48 +162,57 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: Stack(
-        children: [
-          FlutterMap(
-            options: MapOptions(
-              initialCenter: const LatLng(51.509364, -0.128928), // Center the map over London
-              initialZoom: 19,
-              onTap: (tapPosition, point) => setState(() {
-                _showAddPoopLocationDialog(point);
-                //_markerPositions.add(point);
-              }),
-            ),
-          children: [
-            TileLayer( // Display map tiles from any source
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // OSMF's Tile Server
-              userAgentPackageName: 'com.example.app',
-              maxNativeZoom: 19, // Scale tiles when the server doesn't support higher zoom levels
-              // And many more recommended properties!
-            ),
-            CurrentLocationLayer(alignPositionOnUpdate: AlignOnUpdate.always),
-            MarkerLayer(
-            markers: _poopLocations.map((poopLocation) => Marker(
-                point: poopLocation.location(),
-                width: 80,
-                height: 80,
-                child: GestureDetector(
-                  onTap: () => { _showMarkerInfo(poopLocation) },
-                  child: const Icon(Icons.location_pin, color: Colors.red, size: 40),
-                ),
-              )).toList(),
-            ),
-            const RichAttributionWidget( // Include a stylish prebuilt attribution widget that meets all requirments
-              attributions: [
-                TextSourceAttribution(
-                  'OpenStreetMap contributors',
-                  //onTap: () => launchUrl(Uri.parse('https://openstreetmap.org/copyright')), // (external)
-                ),
+      body: FutureBuilder(
+        future: _databaseFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return Stack(
+              children: [
+                FlutterMap(
+                  options: MapOptions(
+                    initialCenter: const LatLng(51.509364, -0.128928), // Center the map over London
+                    initialZoom: 19,
+                    onTap: (tapPosition, point) => setState(() {
+                      _showAddPoopLocationDialog(point);
+                      //_markerPositions.add(point);
+                    }),
+                  ),
+                children: [
+                  TileLayer( // Display map tiles from any source
+                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // OSMF's Tile Server
+                    userAgentPackageName: 'com.example.app',
+                    maxNativeZoom: 19, // Scale tiles when the server doesn't support higher zoom levels
+                    // And many more recommended properties!
+                  ),
+                  CurrentLocationLayer(alignPositionOnUpdate: AlignOnUpdate.always),
+                  MarkerLayer(
+                  markers: _poopLocations.map((poopLocation) => Marker(
+                      point: poopLocation.location(),
+                      width: 80,
+                      height: 80,
+                      child: GestureDetector(
+                        onTap: () => { _showMarkerInfo(poopLocation) },
+                        child: const Icon(Icons.location_pin, color: Colors.red, size: 40),
+                      ),
+                    )).toList(),
+                  ),
+                  const RichAttributionWidget( // Include a stylish prebuilt attribution widget that meets all requirments
+                    attributions: [
+                      TextSourceAttribution(
+                        'OpenStreetMap contributors',
+                        //onTap: () => launchUrl(Uri.parse('https://openstreetmap.org/copyright')), // (external)
+                      ),
+                    ],
+                  ),
+                ],
+              )
               ],
-            ),
-          ],
-        )
-        ],
-      ),
+            );
+          } else {
+            return const Center(child: CircularProgressIndicator());
+          }
+        }
+      )
     );
   }
 }
