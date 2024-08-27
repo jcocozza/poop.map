@@ -66,6 +66,18 @@ class PoopLocation {
       'name': name,
     };
   }
+
+  factory PoopLocation.fromJson(Map<String, dynamic> json) {
+    return PoopLocation(
+      uuid: json["uuid"] as String,
+      latitude: json['latitude'] as double,
+      longitude: json['longitude'] as double,
+      rating: json['rating'] as int,
+      locationType: LocationTypeExtension.fromString(json['location_type'] as String),
+      name: json['name'] as String,
+      firstCreated: json['first_created'] as String,
+    );
+  }
 }
 
 PoopLocation createPoopLocation(double latitude, double longitude, int rating, LocationType locationType, String name) {

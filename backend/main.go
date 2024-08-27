@@ -11,6 +11,7 @@ func main() {
 		panic(err)
 	}
 	datab := &database.Database{DB: db}
-	appState := &api.AppState{DB: datab}
+	repo := &database.Repository{DB: datab}
+	appState := &api.AppState{R: repo}
 	api.Serve(appState)
 }

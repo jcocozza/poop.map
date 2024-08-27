@@ -10,6 +10,7 @@ func Serve(appState *AppState) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/list_all", appState.listPoopLocations)
 	mux.HandleFunc("/api/create", appState.createPoopLocation)
+	mux.HandleFunc("/api/closest", appState.computeClosestPoopLocation)
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:8000"}, // Allow your frontend origin
@@ -19,11 +20,6 @@ func Serve(appState *AppState) {
 	})
 
 	handler := c.Handler(mux)
-
-	/*
-	http.HandleFunc("/api/create", appState.createPoopLocation)
-	http.HandleFunc("/api/list_all", appState.listPoopLocations)
-	*/
 
 	port := ":8080"
 	fmt.Printf("Starting server on port %s...\n", port)

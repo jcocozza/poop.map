@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:poop_map/database/db.dart';
+import 'package:poop_map/requests/requests.dart';
 import 'package:poop_map/model/poop_location.dart';
+import 'package:geolocator/geolocator.dart';
+import 'unpack_polyline.dart';
 
 void main() {
   runApp(const MyApp());
 }
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -35,12 +36,15 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  LatLng? _currentLocation;
   List<PoopLocation> _poopLocations = [];
+  List<Polyline<Object>> _polylines = [];
 
   @override
   void initState() {
     super.initState();
     _loadPoopLocations();
+    _getCurrentLocation();
   }
 
   Future<void> _loadPoopLocations() async {
@@ -153,6 +157,25 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  Future<void> _getCurrentLocation() async {
+    try {
+      Position position = await Geolocator.getCurrentPosition(locationSettings: const LocationSettings(accuracy: LocationAccuracy.high,),);
+      setState(() {
+        _currentLocation = LatLng(position.latitude, position.longitude);
+      });
+      print("Current Location: ${_currentLocation!.latitude}, ${_currentLocation!.longitude}");
+    } catch (e) {
+      print("Error getting location: $e");
+    }
+  }
+
+  void _floatingButtonCallback() async {
+    await _getCurrentLocation();
+    ClosestPoopLocation? closestPoopLocation = await getClosestPoopLocation(_currentLocation!.latitude, _currentLocation!.longitude);
+    setState(() {
+      _polylines.add(Polyline(points: decodePolyline(closestPoopLocation!.route).unpackPolyline()));
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -165,7 +188,7 @@ class _MyHomePageState extends State<MyHomePage> {
             FlutterMap(
               options: MapOptions(
                 initialCenter: const LatLng(
-                    51.509364, -0.128928), // Center the map over London
+                    40.730610, -73.935242), // Center the map over NYC
                 initialZoom: 19,
                 onTap: (tapPosition, point) => setState(() {
                   _showAddPoopLocationDialog(point);
@@ -175,15 +198,11 @@ class _MyHomePageState extends State<MyHomePage> {
               children: [
                 TileLayer(
                   // Display map tiles from any source
-                  urlTemplate:
-                      'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // OSMF's Tile Server
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // OSMF's Tile Server
                   userAgentPackageName: 'com.example.app',
-                  maxNativeZoom:
-                      19, // Scale tiles when the server doesn't support higher zoom levels
-                  // And many more recommended properties!
+                  maxNativeZoom: 19, // Scale tiles when the server doesn't support higher zoom levels
                 ),
-                CurrentLocationLayer(
-                    alignPositionOnUpdate: AlignOnUpdate.always),
+                CurrentLocationLayer(alignPositionOnUpdate: AlignOnUpdate.always),
                 MarkerLayer(
                   markers: _poopLocations
                       .map((poopLocation) => Marker(
@@ -198,6 +217,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           ))
                       .toList(),
                 ),
+                PolylineLayer(polylines: _polylines),
                 const RichAttributionWidget(
                   // Include a stylish prebuilt attribution widget that meets all requirments
                   attributions: [
@@ -208,7 +228,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   ],
                 ),
               ],
-            )
+            ),
+            FloatingActionButton(onPressed: _floatingButtonCallback)
           ],
         ));
   }
