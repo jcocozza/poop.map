@@ -104,13 +104,12 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             ElevatedButton(
               child: const Text('Add'),
-              onPressed: () {
+              onPressed: () async {
                 final name = _nameController.text;
                 final rating = int.tryParse(_ratingController.text) ?? 0;
                 final locationType = _selectedLocationType;
 
                 if (name.isNotEmpty) {
-                  setState(() async {
                     PoopLocation pl = createPoopLocation(
                       location.latitude,
                       location.longitude,
@@ -118,7 +117,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       locationType,
                       name,
                     );
-                    await insertPoopLocation(pl);
+                  await insertPoopLocation(pl);
+                  setState(() {
                     _poopLocations.add(pl);
                   });
                   Navigator.of(context).pop();
