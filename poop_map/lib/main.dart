@@ -36,15 +36,20 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  late final Stream<LocationMarkerPosition?> _positionStream;
   LatLng? _currentLocation;
   List<PoopLocation> _poopLocations = [];
   List<Polyline<Object>> _polylines = [];
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     _loadPoopLocations();
-    _getCurrentLocation();
+    //_getCurrentLocation();
+    const factory = LocationMarkerDataStreamFactory();
+    _positionStream =
+        factory.fromGeolocatorPositionStream().asBroadcastStream();
   }
 
   Future<void> _loadPoopLocations() async {
@@ -170,10 +175,18 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _floatingButtonCallback() async {
-    await _getCurrentLocation();
+    setState(() {
+      _isLoading = true;
+    });
+    //await _getCurrentLocation();
+    //_currentLocation = const LatLng(40.730610, -73.935242);
+    LocationMarkerPosition? _foo = await _positionStream.first;
+    _currentLocation = LatLng(_foo!.latitude, _foo.longitude);
+
     ClosestPoopLocation? closestPoopLocation = await getClosestPoopLocation(_currentLocation!.latitude, _currentLocation!.longitude);
     setState(() {
       _polylines.add(Polyline(points: decodePolyline(closestPoopLocation!.route).unpackPolyline()));
+      _isLoading = false;
     });
   }
   @override
@@ -229,7 +242,18 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ],
             ),
-            FloatingActionButton(onPressed: _floatingButtonCallback)
+            if (_isLoading)
+              const Center(
+                child: Column(
+                  children: [
+                    CircularProgressIndicator(),
+                    Text("determining route to closest poop location. this can take a minute...")
+                  ]
+                ), // Display loading wheel
+              ),
+            FloatingActionButton(onPressed: _floatingButtonCallback,
+              child: const Icon(Icons.navigation_rounded),
+            ),
           ],
         ));
   }
