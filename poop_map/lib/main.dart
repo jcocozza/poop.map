@@ -4,8 +4,6 @@ import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:poop_map/database/db.dart';
 import 'package:poop_map/model/poop_location.dart';
-import 'package:sqflite/sqflite.dart';
-
 
 void main() {
   runApp(const MyApp());
@@ -38,21 +36,20 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   List<PoopLocation> _poopLocations = [];
-  late Future<Database> _databaseFuture;
 
   @override
   void initState() {
     super.initState();
-    _databaseFuture = createDatabase();
     _loadPoopLocations();
   }
 
   Future<void> _loadPoopLocations() async {
     try {
-      final database = await _databaseFuture;
-      final locations = await getAllPoopLocations(database);
+      final locations = await getAllPoopLocations();
       setState(() {
         _poopLocations = locations;
+        print("poop locations set!");
+        print(_poopLocations);
       });
     } catch (e) {
       print('Error loading poop locations: $e');
@@ -83,18 +80,18 @@ class _MyHomePageState extends State<MyHomePage> {
                   keyboardType: TextInputType.number,
                 ),
                 DropdownButton<LocationType>(
-                  value: _selectedLocationType,
-                  items: LocationType.values.map((LocationType locationType) {
-                  return DropdownMenuItem<LocationType>(
-                    value: locationType,
-                    child: Text(locationType.displayName),
-                  );
-                }).toList(),
-                onChanged: (LocationType? newValue) {
-                  setState(() {
-                    _selectedLocationType = newValue!;
-                  });
-                })
+                    value: _selectedLocationType,
+                    items: LocationType.values.map((LocationType locationType) {
+                      return DropdownMenuItem<LocationType>(
+                        value: locationType,
+                        child: Text(locationType.displayName),
+                      );
+                    }).toList(),
+                    onChanged: (LocationType? newValue) {
+                      setState(() {
+                        _selectedLocationType = newValue!;
+                      });
+                    })
               ],
             ),
           ),
@@ -121,8 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       locationType,
                       name,
                     );
-                    final database = await _databaseFuture;
-                    await insertPoopLocation(database, pl);
+                    await insertPoopLocation(pl);
                     _poopLocations.add(pl);
                   });
                   Navigator.of(context).pop();
@@ -133,15 +129,17 @@ class _MyHomePageState extends State<MyHomePage> {
         );
       },
     );
-}
+  }
 
   void _showMarkerInfo(PoopLocation poopLocation) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Poop Location: ${poopLocation.name} - ${poopLocation.locationType.displayName}'),
-          content: Text('${poopLocation.name} is rated ${poopLocation.rating} and has been around since ${poopLocation.firstCreated}'),
+          title: Text(
+              'Poop Location: ${poopLocation.name} - ${poopLocation.locationType.displayName}'),
+          content: Text(
+              '${poopLocation.name} is rated ${poopLocation.rating} and has been around since ${poopLocation.firstCreated}'),
           actions: <Widget>[
             TextButton(
               child: const Text('Close'),
@@ -158,61 +156,60 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: FutureBuilder(
-        future: _databaseFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            return Stack(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: Text(widget.title),
+        ),
+        body: Stack(
+          children: [
+            FlutterMap(
+              options: MapOptions(
+                initialCenter: const LatLng(
+                    51.509364, -0.128928), // Center the map over London
+                initialZoom: 19,
+                onTap: (tapPosition, point) => setState(() {
+                  _showAddPoopLocationDialog(point);
+                  //_markerPositions.add(point);
+                }),
+              ),
               children: [
-                FlutterMap(
-                  options: MapOptions(
-                    initialCenter: const LatLng(51.509364, -0.128928), // Center the map over London
-                    initialZoom: 19,
-                    onTap: (tapPosition, point) => setState(() {
-                      _showAddPoopLocationDialog(point);
-                      //_markerPositions.add(point);
-                    }),
-                  ),
-                children: [
-                  TileLayer( // Display map tiles from any source
-                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // OSMF's Tile Server
-                    userAgentPackageName: 'com.example.app',
-                    maxNativeZoom: 19, // Scale tiles when the server doesn't support higher zoom levels
-                    // And many more recommended properties!
-                  ),
-                  CurrentLocationLayer(alignPositionOnUpdate: AlignOnUpdate.always),
-                  MarkerLayer(
-                  markers: _poopLocations.map((poopLocation) => Marker(
-                      point: poopLocation.location(),
-                      width: 80,
-                      height: 80,
-                      child: GestureDetector(
-                        onTap: () => { _showMarkerInfo(poopLocation) },
-                        child: const Icon(Icons.location_pin, color: Colors.red, size: 40),
-                      ),
-                    )).toList(),
-                  ),
-                  const RichAttributionWidget( // Include a stylish prebuilt attribution widget that meets all requirments
-                    attributions: [
-                      TextSourceAttribution(
-                        'OpenStreetMap contributors',
-                        //onTap: () => launchUrl(Uri.parse('https://openstreetmap.org/copyright')), // (external)
-                      ),
-                    ],
-                  ),
-                ],
-              )
+                TileLayer(
+                  // Display map tiles from any source
+                  urlTemplate:
+                      'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // OSMF's Tile Server
+                  userAgentPackageName: 'com.example.app',
+                  maxNativeZoom:
+                      19, // Scale tiles when the server doesn't support higher zoom levels
+                  // And many more recommended properties!
+                ),
+                CurrentLocationLayer(
+                    alignPositionOnUpdate: AlignOnUpdate.always),
+                MarkerLayer(
+                  markers: _poopLocations
+                      .map((poopLocation) => Marker(
+                            point: poopLocation.location(),
+                            width: 80,
+                            height: 80,
+                            child: GestureDetector(
+                              onTap: () => {_showMarkerInfo(poopLocation)},
+                              child: const Icon(Icons.location_pin,
+                                  color: Colors.red, size: 40),
+                            ),
+                          ))
+                      .toList(),
+                ),
+                const RichAttributionWidget(
+                  // Include a stylish prebuilt attribution widget that meets all requirments
+                  attributions: [
+                    TextSourceAttribution(
+                      'OpenStreetMap contributors',
+                      //onTap: () => launchUrl(Uri.parse('https://openstreetmap.org/copyright')), // (external)
+                    ),
+                  ],
+                ),
               ],
-            );
-          } else {
-            return const Center(child: CircularProgressIndicator());
-          }
-        }
-      )
-    );
+            )
+          ],
+        ));
   }
 }
