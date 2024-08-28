@@ -1,10 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:poop_map/requests/requests.dart';
 import 'package:poop_map/model/poop_location.dart';
-import 'package:geolocator/geolocator.dart';
 import 'unpack_polyline.dart';
 
 void main() {
@@ -41,6 +42,8 @@ class _MyHomePageState extends State<MyHomePage> {
   List<PoopLocation> _poopLocations = [];
   List<Polyline<Object>> _polylines = [];
   bool _isLoading = false;
+  StreamSubscription<LocationMarkerPosition?>? _positionSubscription;
+
 
   @override
   void initState() {
@@ -48,8 +51,19 @@ class _MyHomePageState extends State<MyHomePage> {
     _loadPoopLocations();
     //_getCurrentLocation();
     const factory = LocationMarkerDataStreamFactory();
-    _positionStream =
-        factory.fromGeolocatorPositionStream().asBroadcastStream();
+    _positionStream = factory.fromGeolocatorPositionStream().asBroadcastStream();
+    _positionSubscription = _positionStream.listen((position) {
+    if (position != null) {
+      setState(() {
+        _currentLocation = LatLng(position.latitude, position.longitude);
+      });
+    }
+    });
+  }
+  @override
+  void dispose() {
+    _positionSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadPoopLocations() async {
@@ -162,33 +176,28 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Future<void> _getCurrentLocation() async {
-    try {
-      Position position = await Geolocator.getCurrentPosition(locationSettings: const LocationSettings(accuracy: LocationAccuracy.high,),);
-      setState(() {
-        _currentLocation = LatLng(position.latitude, position.longitude);
-      });
-      print("Current Location: ${_currentLocation!.latitude}, ${_currentLocation!.longitude}");
-    } catch (e) {
-      print("Error getting location: $e");
-    }
+void _floatingButtonCallback() async {
+  if (_currentLocation == null) {
+    print("Error: Current location is not available");
+    return;
   }
 
-  void _floatingButtonCallback() async {
-    setState(() {
-      _isLoading = true;
-    });
-    //await _getCurrentLocation();
-    //_currentLocation = const LatLng(40.730610, -73.935242);
-    LocationMarkerPosition? _foo = await _positionStream.first;
-    _currentLocation = LatLng(_foo!.latitude, _foo.longitude);
+  setState(() {
+    _isLoading = true;
+  });
 
-    ClosestPoopLocation? closestPoopLocation = await getClosestPoopLocation(_currentLocation!.latitude, _currentLocation!.longitude);
+  ClosestPoopLocation? closestPoopLocation = await getClosestPoopLocation(
+      _currentLocation!.latitude, _currentLocation!.longitude);
+
+  if (closestPoopLocation != null) {
     setState(() {
-      _polylines.add(Polyline(points: decodePolyline(closestPoopLocation!.route).unpackPolyline()));
+      _polylines.add(
+          Polyline(points: decodePolyline(closestPoopLocation.route).unpackPolyline()));
       _isLoading = false;
     });
   }
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -205,7 +214,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 initialZoom: 19,
                 onTap: (tapPosition, point) => setState(() {
                   _showAddPoopLocationDialog(point);
-                  //_markerPositions.add(point);
                 }),
               ),
               children: [
