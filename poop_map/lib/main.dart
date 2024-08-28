@@ -1,18 +1,35 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:poop_map/requests/requests.dart';
 import 'package:poop_map/model/poop_location.dart';
+import 'package:poop_map/utils/read_config.dart';
 import 'unpack_polyline.dart';
 
-void main() {
-  runApp(const MyApp());
+const String appConfigAsset = "../config.json";
+
+Future<Config> loadConfig() async {
+  try {
+    final String configContent = await rootBundle.loadString(appConfigAsset);
+    return parseConfig(configContent);
+  } catch (e) {
+    print('Error loading config: $e');
+    rethrow;
+  }
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final config = await loadConfig();
+  runApp(MyApp(config: config,));
 }
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final Config config;
+  const MyApp({super.key, required this.config});
 
   // This widget is the root of your application.
   @override
@@ -23,13 +40,14 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'click to add a poop location'),
+      home: MyHomePage(title: 'click to add a poop location', config: config,),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  final Config config;
+  const MyHomePage({super.key, required this.title, required this.config});
   final String title;
 
   @override
@@ -68,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _loadPoopLocations() async {
     try {
-      final locations = await getAllPoopLocations();
+      final locations = await getAllPoopLocations(widget.config);
       setState(() {
         _poopLocations = locations;
         print("poop locations set!");
@@ -140,7 +158,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       locationType,
                       name,
                     );
-                  await insertPoopLocation(pl);
+                  await insertPoopLocation(widget.config, pl);
                   setState(() {
                     _poopLocations.add(pl);
                   });
@@ -186,7 +204,7 @@ void _floatingButtonCallback() async {
     _isLoading = true;
   });
 
-  ClosestPoopLocation? closestPoopLocation = await getClosestPoopLocation(
+  ClosestPoopLocation? closestPoopLocation = await getClosestPoopLocation(widget.config,
       _currentLocation!.latitude, _currentLocation!.longitude);
 
   if (closestPoopLocation != null) {

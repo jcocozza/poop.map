@@ -10,10 +10,12 @@ import (
 	"github.com/jcocozza/poop.map/backend/database"
 	"github.com/jcocozza/poop.map/backend/model"
 	routecomputer "github.com/jcocozza/poop.map/backend/routeComputer"
+	"github.com/jcocozza/poop.map/backend/utils"
 )
 
 type AppState struct {
 	R *database.Repository
+	Cfg utils.Config
 }
 
 // a requestion to this handle looks like:

@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:poop_map/model/poop_location.dart';
+import 'package:poop_map/utils/read_config.dart';
+
 
 class ClosestPoopLocation {
   PoopLocation poopLocation;
@@ -17,8 +19,8 @@ class ClosestPoopLocation {
 }
 
 /// Call the api to get the closest poop location and the route to it
-Future<ClosestPoopLocation?> getClosestPoopLocation(double currLat, double currLong) async {
-  const baseUrl = 'http://localhost:8080/api/closest';
+Future<ClosestPoopLocation?> getClosestPoopLocation(Config cfg, double currLat, double currLong) async {
+  final baseUrl = '${cfg.backendUrl}:${cfg.backendPort}/api/closest';
   String params = "?latitude=${currLat}&longitude=${currLong}";
   final url = Uri.parse("$baseUrl$params");
   try {
@@ -40,8 +42,8 @@ Future<ClosestPoopLocation?> getClosestPoopLocation(double currLat, double currL
 }
 
 /// Call the api to create a new poop location
-Future<void> insertPoopLocation(PoopLocation poopLocation) async {
-  const baseUrl = 'http://localhost:8080/api/create';
+Future<void> insertPoopLocation(Config cfg, PoopLocation poopLocation) async {
+  final baseUrl = '${cfg.backendUrl}:${cfg.backendPort}/api/create';
   final url = Uri.parse(baseUrl);
   final jsonObj = poopLocation.toMap();
   final jsonBody = jsonEncode(jsonObj);
@@ -64,8 +66,8 @@ Future<void> insertPoopLocation(PoopLocation poopLocation) async {
 }
 
 /// Call the api to list all poop locations
-Future<List<PoopLocation>> getAllPoopLocations() async {
-  final url = Uri.parse("http://localhost:8080/api/list_all");
+Future<List<PoopLocation>> getAllPoopLocations(Config cfg) async {
+  final url = Uri.parse("${cfg.backendUrl}:${cfg.backendPort}/api/list_all");
   try {
     final response = await http.get(url);
     if (response.statusCode == 200) {

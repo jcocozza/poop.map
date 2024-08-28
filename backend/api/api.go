@@ -12,8 +12,9 @@ func Serve(appState *AppState) {
 	mux.HandleFunc("/api/create", appState.createPoopLocation)
 	mux.HandleFunc("/api/closest", appState.computeClosestPoopLocation)
 
+	frontendOrigin := fmt.Sprintf("%s:%s", appState.Cfg.FrontendUrl, appState.Cfg.FrontendPort)
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:8000"}, // Allow your frontend origin
+		AllowedOrigins:   []string{frontendOrigin}, // Allow your frontend origin
 		AllowCredentials: true,
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
@@ -21,7 +22,7 @@ func Serve(appState *AppState) {
 
 	handler := c.Handler(mux)
 
-	port := ":8080"
+	port := fmt.Sprintf(":%s", appState.Cfg.BackendPort)
 	fmt.Printf("Starting server on port %s...\n", port)
 	if err := http.ListenAndServe(port, handler); err != nil {
 		fmt.Printf("Server failed to start: %v\n", err)
