@@ -20,7 +20,7 @@ class ClosestPoopLocation {
 
 /// Call the api to get the closest poop location and the route to it
 Future<ClosestPoopLocation?> getClosestPoopLocation(Config cfg, double currLat, double currLong) async {
-  final baseUrl = '${cfg.backendUrl}:${cfg.backendPort}/api/closest';
+  final baseUrl = '${cfg.backendUrl}/api/closest';
   String params = "?latitude=${currLat}&longitude=${currLong}";
   final url = Uri.parse("$baseUrl$params");
   try {
@@ -43,7 +43,7 @@ Future<ClosestPoopLocation?> getClosestPoopLocation(Config cfg, double currLat, 
 
 /// Call the api to create a new poop location
 Future<void> insertPoopLocation(Config cfg, PoopLocation poopLocation) async {
-  final baseUrl = '${cfg.backendUrl}:${cfg.backendPort}/api/create';
+  final baseUrl = '${cfg.backendUrl}/api/create';
   final url = Uri.parse(baseUrl);
   final jsonObj = poopLocation.toMap();
   final jsonBody = jsonEncode(jsonObj);
@@ -67,7 +67,7 @@ Future<void> insertPoopLocation(Config cfg, PoopLocation poopLocation) async {
 
 /// Call the api to list all poop locations
 Future<List<PoopLocation>> getAllPoopLocations(Config cfg) async {
-  final url = Uri.parse("${cfg.backendUrl}:${cfg.backendPort}/api/list_all");
+  final url = Uri.parse("${cfg.backendUrl}/api/list_all");
   try {
     final response = await http.get(url);
     if (response.statusCode == 200) {

@@ -12,7 +12,7 @@ func Serve(appState *AppState) {
 	mux.HandleFunc("/api/create", appState.createPoopLocation)
 	mux.HandleFunc("/api/closest", appState.computeClosestPoopLocation)
 
-	frontendOrigin := fmt.Sprintf("%s:%s", appState.Cfg.FrontendUrl, appState.Cfg.FrontendPort)
+	frontendOrigin := fmt.Sprintf("%s", appState.Cfg.FrontendUrl)
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{frontendOrigin}, // Allow your frontend origin
 		AllowCredentials: true,
