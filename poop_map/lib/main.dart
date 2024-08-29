@@ -8,8 +8,9 @@ import 'package:latlong2/latlong.dart';
 import 'package:poop_map/requests/requests.dart';
 import 'package:poop_map/model/poop_location.dart';
 import 'package:poop_map/utils/read_config.dart';
+import 'package:poop_map/widgets/create_poop_location_dialog.dart';
+import 'package:poop_map/widgets/marker/marker.dart';
 import 'unpack_polyline.dart';
-import 'widgets/star_rating.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 const String appConfigAsset = "../config.json";
@@ -64,12 +65,10 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _isLoading = false;
   StreamSubscription<LocationMarkerPosition?>? _positionSubscription;
 
-
   @override
   void initState() {
     super.initState();
     _loadPoopLocations();
-    //_getCurrentLocation();
     const factory = LocationMarkerDataStreamFactory();
     _positionStream = factory.fromGeolocatorPositionStream().asBroadcastStream();
     _positionSubscription = _positionStream.listen((position) {
@@ -97,114 +96,6 @@ class _MyHomePageState extends State<MyHomePage> {
     } catch (e) {
       print('Error loading poop locations: $e');
     }
-  }
-
-  void _showAddPoopLocationDialog(LatLng location) async {
-    final _nameController = TextEditingController();
-    int _rating = 1;
-    LocationType _selectedLocationType = LocationType.regular;
-
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setStateLoc) {
-            return AlertDialog(
-              title: const Text('Add Poop Location'),
-              content: SingleChildScrollView(
-                child: ListBody(
-                  children: <Widget>[
-                    TextField(
-                      controller: _nameController,
-                      decoration: const InputDecoration(labelText: 'Name'),
-                    ),
-                    const Text('Rating:'),
-                    StarRating(
-                    rating: _rating,
-                    readOnly: false,
-                    onRatingChanged: (int rating) {
-                      setStateLoc(() {
-                        _rating = rating;
-                      });
-                    },
-                  ),
-                    DropdownButton<LocationType>(
-                        value: _selectedLocationType,
-                        items: LocationType.values.map((LocationType locationType) {
-                          return DropdownMenuItem<LocationType>(
-                            value: locationType,
-                            child: Text(locationType.displayName),
-                          );
-                        }).toList(),
-                        onChanged: (LocationType? newValue) {
-                          setStateLoc(() {
-                            _selectedLocationType = newValue!;
-                          });
-                        })
-                  ],
-                ),
-              ),
-              actions: <Widget>[
-                TextButton(
-                  child: const Text('Cancel'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-                ElevatedButton(
-                  child: const Text('Add'),
-                  onPressed: () async {
-                    final name = _nameController.text;
-                    final locationType = _selectedLocationType;
-                    if (name.isNotEmpty) {
-                        PoopLocation pl = createPoopLocation(
-                          location.latitude,
-                          location.longitude,
-                          _rating,
-                          locationType,
-                          name,
-                        );
-                      await insertPoopLocation(widget.config, pl);
-                      Navigator.of(context).pop();
-                      setState(() {
-                        _poopLocations.add(pl);
-                      });
-                    }
-                  },
-                ),
-              ],
-            );
-          }
-        );
-      },
-    );
-  }
-
-  void _showMarkerInfo(PoopLocation poopLocation) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Column(
-            children: [
-              StarRating(rating: poopLocation.rating),
-              Text('Poop Location: ${poopLocation.name} - ${poopLocation.locationType.displayName}'),
-            ],
-          ),
-          content: Text(
-              '${poopLocation.name} is rated ${poopLocation.rating} and has been around since ${poopLocation.firstCreated}'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Close'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 
 void _floatingButtonCallback() async {
@@ -243,9 +134,11 @@ void _floatingButtonCallback() async {
                 initialCenter: const LatLng(
                     40.730610, -73.935242), // Center the map over NYC
                 initialZoom: 19,
-                onTap: (tapPosition, point) => setState(() {
-                  _showAddPoopLocationDialog(point);
-                }),
+                onTap: (tapPosition, point) => {
+                  showAddPoopLocationDialog(context, widget.config, point, (PoopLocation pl) => {
+                    setState(() { _poopLocations.add(pl); })
+                  })
+                }
               ),
               children: [
                 TileLayer(
@@ -257,16 +150,7 @@ void _floatingButtonCallback() async {
                 CurrentLocationLayer(alignPositionOnUpdate: AlignOnUpdate.once),
                 MarkerLayer(
                   markers: _poopLocations
-                      .map((poopLocation) => Marker(
-                            point: poopLocation.location(),
-                            width: 80,
-                            height: 80,
-                            child: GestureDetector(
-                              onTap: () => {_showMarkerInfo(poopLocation)},
-                              child: const Icon(Icons.location_pin,
-                                  color: Colors.red, size: 40),
-                            ),
-                          ))
+                      .map((poopLocation) => makeMarker(poopLocation, 80, 80, 40, context))
                       .toList(),
                 ),
                 PolylineLayer(polylines: _polylines),
