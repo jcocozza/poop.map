@@ -121,6 +121,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     const Text('Rating:'),
                     StarRating(
                     rating: _rating,
+                    readOnly: false,
                     onRatingChanged: (int rating) {
                       setStateLoc(() {
                         _rating = rating;
@@ -184,8 +185,12 @@ class _MyHomePageState extends State<MyHomePage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(
-              'Poop Location: ${poopLocation.name} - ${poopLocation.locationType.displayName}'),
+          title: Column(
+            children: [
+              StarRating(rating: poopLocation.rating),
+              Text('Poop Location: ${poopLocation.name} - ${poopLocation.locationType.displayName}'),
+            ],
+          ),
           content: Text(
               '${poopLocation.name} is rated ${poopLocation.rating} and has been around since ${poopLocation.firstCreated}'),
           actions: <Widget>[
