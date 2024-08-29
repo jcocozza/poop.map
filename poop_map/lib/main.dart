@@ -253,7 +253,7 @@ void _floatingButtonCallback() async {
                   userAgentPackageName: 'com.example.app',
                   maxNativeZoom: 19, // Scale tiles when the server doesn't support higher zoom levels
                 ),
-                CurrentLocationLayer(alignPositionOnUpdate: AlignOnUpdate.always),
+                CurrentLocationLayer(alignPositionOnUpdate: AlignOnUpdate.once),
                 MarkerLayer(
                   markers: _poopLocations
                       .map((poopLocation) => Marker(
