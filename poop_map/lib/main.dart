@@ -10,6 +10,7 @@ import 'package:poop_map/model/poop_location.dart';
 import 'package:poop_map/utils/read_config.dart';
 import 'unpack_polyline.dart';
 import 'widgets/star_rating.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 const String appConfigAsset = "../config.json";
 
@@ -269,12 +270,12 @@ void _floatingButtonCallback() async {
                       .toList(),
                 ),
                 PolylineLayer(polylines: _polylines),
-                const RichAttributionWidget(
+                RichAttributionWidget(
                   // Include a stylish prebuilt attribution widget that meets all requirments
                   attributions: [
                     TextSourceAttribution(
                       'OpenStreetMap contributors',
-                      //onTap: () => launchUrl(Uri.parse('https://openstreetmap.org/copyright')), // (external)
+                      onTap: () => launchUrl(Uri.parse('https://openstreetmap.org/copyright')), // (external)
                     ),
                   ],
                 ),
