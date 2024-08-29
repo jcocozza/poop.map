@@ -106,67 +106,70 @@ class _MyHomePageState extends State<MyHomePage> {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Add Poop Location'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                TextField(
-                  controller: _nameController,
-                  decoration: const InputDecoration(labelText: 'Name'),
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setStateLoc) {
+            return AlertDialog(
+              title: const Text('Add Poop Location'),
+              content: SingleChildScrollView(
+                child: ListBody(
+                  children: <Widget>[
+                    TextField(
+                      controller: _nameController,
+                      decoration: const InputDecoration(labelText: 'Name'),
+                    ),
+                    TextField(
+                      controller: _ratingController,
+                      decoration: const InputDecoration(labelText: 'Rating'),
+                      keyboardType: TextInputType.number,
+                    ),
+                    DropdownButton<LocationType>(
+                        value: _selectedLocationType,
+                        items: LocationType.values.map((LocationType locationType) {
+                          return DropdownMenuItem<LocationType>(
+                            value: locationType,
+                            child: Text(locationType.displayName),
+                          );
+                        }).toList(),
+                        onChanged: (LocationType? newValue) {
+                          setStateLoc(() {
+                            _selectedLocationType = newValue!;
+                          });
+                        })
+                  ],
                 ),
-                TextField(
-                  controller: _ratingController,
-                  decoration: const InputDecoration(labelText: 'Rating'),
-                  keyboardType: TextInputType.number,
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
                 ),
-                DropdownButton<LocationType>(
-                    value: _selectedLocationType,
-                    items: LocationType.values.map((LocationType locationType) {
-                      return DropdownMenuItem<LocationType>(
-                        value: locationType,
-                        child: Text(locationType.displayName),
-                      );
-                    }).toList(),
-                    onChanged: (LocationType? newValue) {
+                ElevatedButton(
+                  child: const Text('Add'),
+                  onPressed: () async {
+                    final name = _nameController.text;
+                    final rating = int.tryParse(_ratingController.text) ?? 0;
+                    final locationType = _selectedLocationType;
+                    if (name.isNotEmpty) {
+                        PoopLocation pl = createPoopLocation(
+                          location.latitude,
+                          location.longitude,
+                          rating,
+                          locationType,
+                          name,
+                        );
+                      await insertPoopLocation(widget.config, pl);
+                      Navigator.of(context).pop();
                       setState(() {
-                        _selectedLocationType = newValue!;
+                        _poopLocations.add(pl);
                       });
-                    })
+                    }
+                  },
+                ),
               ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            ElevatedButton(
-              child: const Text('Add'),
-              onPressed: () async {
-                final name = _nameController.text;
-                final rating = int.tryParse(_ratingController.text) ?? 0;
-                final locationType = _selectedLocationType;
-
-                if (name.isNotEmpty) {
-                    PoopLocation pl = createPoopLocation(
-                      location.latitude,
-                      location.longitude,
-                      rating,
-                      locationType,
-                      name,
-                    );
-                  await insertPoopLocation(widget.config, pl);
-                  setState(() {
-                    _poopLocations.add(pl);
-                  });
-                  Navigator.of(context).pop();
-                }
-              },
-            ),
-          ],
+            );
+          }
         );
       },
     );
