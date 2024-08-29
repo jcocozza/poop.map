@@ -9,6 +9,7 @@ import 'package:poop_map/requests/requests.dart';
 import 'package:poop_map/model/poop_location.dart';
 import 'package:poop_map/utils/read_config.dart';
 import 'unpack_polyline.dart';
+import 'widgets/star_rating.dart';
 
 const String appConfigAsset = "../config.json";
 
@@ -99,7 +100,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _showAddPoopLocationDialog(LatLng location) async {
     final _nameController = TextEditingController();
-    final _ratingController = TextEditingController();
+    int _rating = 1;
     LocationType _selectedLocationType = LocationType.regular;
 
     return showDialog<void>(
@@ -117,11 +118,15 @@ class _MyHomePageState extends State<MyHomePage> {
                       controller: _nameController,
                       decoration: const InputDecoration(labelText: 'Name'),
                     ),
-                    TextField(
-                      controller: _ratingController,
-                      decoration: const InputDecoration(labelText: 'Rating'),
-                      keyboardType: TextInputType.number,
-                    ),
+                    const Text('Rating:'),
+                    StarRating(
+                    rating: _rating,
+                    onRatingChanged: (int rating) {
+                      setStateLoc(() {
+                        _rating = rating;
+                      });
+                    },
+                  ),
                     DropdownButton<LocationType>(
                         value: _selectedLocationType,
                         items: LocationType.values.map((LocationType locationType) {
@@ -149,13 +154,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: const Text('Add'),
                   onPressed: () async {
                     final name = _nameController.text;
-                    final rating = int.tryParse(_ratingController.text) ?? 0;
                     final locationType = _selectedLocationType;
                     if (name.isNotEmpty) {
                         PoopLocation pl = createPoopLocation(
                           location.latitude,
                           location.longitude,
-                          rating,
+                          _rating,
                           locationType,
                           name,
                         );
