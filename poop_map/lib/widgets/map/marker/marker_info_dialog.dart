@@ -19,8 +19,8 @@ class MarkerInfoDialog extends StatelessWidget {
           Text('Poop Location: ${poopLocation.name} - ${poopLocation.locationType.displayName}'),
         ],
       ),
-      content: Text(
-          '${poopLocation.name} is rated ${poopLocation.rating} and has been around since ${poopLocation.firstCreated}'),
+      content: Text( // TODO: clean this up and make it better
+          '${poopLocation.name} is rated ${poopLocation.rating} and has been around since ${poopLocation.firstCreated}\n\n${poopLocation.notes}'),
       actions: <Widget>[
         TextButton(
           child: const Text('Close'),

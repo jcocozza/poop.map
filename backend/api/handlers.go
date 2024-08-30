@@ -14,7 +14,7 @@ import (
 )
 
 type AppState struct {
-	R *database.Repository
+	R   *database.Repository
 	Cfg utils.Config
 }
 
@@ -45,7 +45,7 @@ func (a *AppState) computeClosestPoopLocation(w http.ResponseWriter, r *http.Req
 
 	type resp struct {
 		PoopLocation model.PoopLocation `json:"poop_location"`
-		Route string `json:"route"`
+		Route        string             `json:"route"`
 	}
 
 	res := resp{PoopLocation: poopLocation, Route: route}
@@ -82,20 +82,27 @@ func (a *AppState) createPoopLocation(w http.ResponseWriter, r *http.Request) {
 
 func (a *AppState) listPoopLocations(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		sendErrorResponse(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
 	}
 
 	poopLocations, err := a.R.ListPoopLocations(context.TODO())
 	if err != nil {
-		http.Error(w, "failed to query database", http.StatusInternalServerError)
+		sendErrorResponse(w, "failed to query database", http.StatusInternalServerError)
 		return
 	}
 
+	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(poopLocations)
 	if err != nil {
-		http.Error(w, "failed to encode", http.StatusInternalServerError)
+		sendErrorResponse(w, "failed to encode", http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
+}
+
+// sendErrorResponse sends a JSON error response with the given message and status code.
+func sendErrorResponse(w http.ResponseWriter, message string, statusCode int) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(map[string]string{"error": message})
 }

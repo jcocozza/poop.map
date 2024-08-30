@@ -12,14 +12,14 @@ type Repository struct {
 
 // Create a new poop location in the database
 func (r *Repository) CreatePoopLocation(ctx context.Context, poopLocation model.PoopLocation) error {
-	sql := `INSERT INTO poop_locations (uuid, latitude, longitude, rating, first_created, location_type, name)
-	VALUES (?, ?, ?, ?, ?, ?, ?);`
-	return r.DB.Execute(ctx, sql, poopLocation.Uuid, poopLocation.Latitude, poopLocation.Longitude, poopLocation.Rating, poopLocation.FirstCreated, poopLocation.LocationType, poopLocation.Name)
+	sql := `INSERT INTO poop_locations (uuid, latitude, longitude, rating, first_created, location_type, name, notes)
+	VALUES (?, ?, ?, ?, ?, ?, ?, ?);`
+	return r.DB.Execute(ctx, sql, poopLocation.Uuid, poopLocation.Latitude, poopLocation.Longitude, poopLocation.Rating, poopLocation.FirstCreated, poopLocation.LocationType, poopLocation.Name, poopLocation.Notes)
 }
 
 // List all poop locations in the database
 func (r *Repository) ListPoopLocations(ctx context.Context) ([]model.PoopLocation, error) {
-	sql := "SELECT uuid, latitude, longitude, rating, first_created, location_type, name FROM poop_locations;"
+	sql := "SELECT uuid, latitude, longitude, rating, first_created, location_type, name, notes FROM poop_locations;"
 	poopLocations := []model.PoopLocation{}
 	rows, err := r.DB.Query(ctx, sql)
 	if err != nil {
@@ -28,7 +28,7 @@ func (r *Repository) ListPoopLocations(ctx context.Context) ([]model.PoopLocatio
 	for rows.Next() {
 		poopLocation := model.PoopLocation{}
 
-		err := rows.Scan(&poopLocation.Uuid, &poopLocation.Latitude, &poopLocation.Longitude, &poopLocation.Rating, &poopLocation.FirstCreated, &poopLocation.LocationType, &poopLocation.Name)
+		err := rows.Scan(&poopLocation.Uuid, &poopLocation.Latitude, &poopLocation.Longitude, &poopLocation.Rating, &poopLocation.FirstCreated, &poopLocation.LocationType, &poopLocation.Name, &poopLocation.Notes)
 		if err != nil {
 			continue
 		}

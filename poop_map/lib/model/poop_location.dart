@@ -39,6 +39,7 @@ class PoopLocation {
   final String firstCreated; // date of creation
   final LocationType locationType;
   final String name;
+  final String notes;
 
   const PoopLocation({
     required this.uuid,
@@ -48,6 +49,7 @@ class PoopLocation {
     required this.firstCreated,
     required this.locationType,
     required this.name,
+    required this.notes,
   });
 
   /// return the lat/lng coord
@@ -64,6 +66,7 @@ class PoopLocation {
       'first_created': firstCreated,
       'location_type': locationType.displayName,
       'name': name,
+      'notes': notes,
     };
   }
 
@@ -75,15 +78,16 @@ class PoopLocation {
       rating: json['rating'] as int,
       locationType: LocationTypeExtension.fromString(json['location_type'] as String),
       name: json['name'] as String,
+      notes: json['notes'] as String,
       firstCreated: json['first_created'] as String,
     );
   }
 }
 
-PoopLocation createPoopLocation(double latitude, double longitude, int rating, LocationType locationType, String name) {
+PoopLocation createPoopLocation(double latitude, double longitude, int rating, LocationType locationType, String name, String notes) {
   const uuid = Uuid();
 
   DateTime now = DateTime.now();
   String currentDate = DateFormat.yMMMMd('en_US').format(now);
-  return PoopLocation(uuid: uuid.v4(), latitude: latitude, longitude: longitude, rating: rating, firstCreated: currentDate, locationType: locationType, name: name);
+  return PoopLocation(uuid: uuid.v4(), latitude: latitude, longitude: longitude, rating: rating, firstCreated: currentDate, locationType: locationType, name: name, notes: notes);
 }

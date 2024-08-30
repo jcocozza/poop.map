@@ -23,6 +23,7 @@ class PoopLocationDialog extends StatefulWidget {
 
 class _PoopLocationDialogState extends State<PoopLocationDialog> {
   final _nameController = TextEditingController();
+  final _notesController = TextEditingController();
   int _rating = 1;
   LocationType _selectedLocationType = LocationType.regular;
 
@@ -59,7 +60,16 @@ class _PoopLocationDialogState extends State<PoopLocationDialog> {
                 setState(() {
                   _selectedLocationType = newValue!;
                 });
-              })
+              }
+            ),
+            TextField(
+              maxLines: 5,
+              controller: _notesController,
+              decoration: const InputDecoration(
+                hintText: 'notes',
+                border: OutlineInputBorder(),
+              ),
+            ),
           ],
         ),
       ),
@@ -73,13 +83,15 @@ class _PoopLocationDialogState extends State<PoopLocationDialog> {
           onPressed: () async {
             final name = _nameController.text;
             final locationType = _selectedLocationType;
+            final notes = _notesController.text;
             if (name.isNotEmpty) {
               PoopLocation pl = createPoopLocation(
                 widget.location.latitude,
                 widget.location.longitude,
                 _rating,
                 locationType,
-                name
+                name,
+                notes,
               );
               await insertPoopLocation(widget.cfg, pl);
               Navigator.of(context).pop();
@@ -92,7 +104,6 @@ class _PoopLocationDialogState extends State<PoopLocationDialog> {
   }
 }
 
-/// Show the dialog for adding a poop location
 /// Show the dialog for adding a poop location
 void showAddPoopLocationDialog(BuildContext ctx, Config cfg, LatLng location, Function(PoopLocation) onPoopLocationAdd) async {
   return showDialog(

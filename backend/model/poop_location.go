@@ -8,4 +8,5 @@ type PoopLocation struct {
 	FirstCreated string  `json:"first_created"`
 	LocationType string  `json:"location_type"`
 	Name         string  `json:"name"`
+	Notes		 string  `json:"notes"`
 }

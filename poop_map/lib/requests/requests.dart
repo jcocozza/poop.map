@@ -3,7 +3,6 @@ import 'package:http/http.dart' as http;
 import 'package:poop_map/model/poop_location.dart';
 import 'package:poop_map/utils/read_config.dart';
 
-
 class ClosestPoopLocation {
   PoopLocation poopLocation;
   String route;
@@ -81,6 +80,7 @@ Future<List<PoopLocation>> getAllPoopLocations(Config cfg) async {
           firstCreated: item['first_created'] as String,
           locationType: LocationTypeExtension.fromString(item['location_type'] as String),
           name: item['name'] as String,
+          notes: item['notes'] as String,
         );
       }).toList();
     } else {
