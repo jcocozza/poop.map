@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:poop_map/model/poop_location.dart';
-import 'package:poop_map/widgets/marker/marker_info_dialog.dart';
+import 'package:poop_map/widgets/map/marker/marker_info_dialog.dart';
 
 Marker makeMarker(PoopLocation poopLocation, double width, double height, double iconSize, BuildContext ctx) {
   return Marker(
