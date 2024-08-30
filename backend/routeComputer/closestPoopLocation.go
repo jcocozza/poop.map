@@ -20,6 +20,7 @@ func computeClosestPoopLocation(currLat, currLong float64, poopLocations []model
 			smallestDist = haversineDist
 			closestPoopLocation = poopLocation
 		} else if haversineDist < smallestDist {
+			smallestDist = haversineDist
 			closestPoopLocation = poopLocation
 		}
 	}
