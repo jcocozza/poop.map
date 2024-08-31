@@ -10,6 +10,6 @@ Marker makeMarker(PoopLocation poopLocation, double width, double height, double
     height: height,
     child: GestureDetector(
       onTap: () => showMarkerInfoDialog(ctx, poopLocation),
-      child: Icon(Icons.location_pin, color: Colors.red, size: iconSize,),
+      child: Icon(Icons.location_pin, color: poopLocation.locationType.color, size: iconSize,),
     ));
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart';
@@ -21,6 +22,19 @@ extension LocationTypeExtension on LocationType {
       case LocationType.other:
       default:
         return 'other';
+    }
+  }
+  MaterialColor get color {
+    switch (this) {
+      case LocationType.regular:
+        return Colors.red;
+      case LocationType.portaPotty:
+        return Colors.green;
+      case LocationType.outhouse:
+        return Colors.brown;
+      case LocationType.other:
+      default:
+        return Colors.blue;
     }
   }
   static LocationType fromString(String value) {
