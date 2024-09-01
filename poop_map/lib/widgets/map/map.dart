@@ -33,6 +33,8 @@ class _MapState extends State<PoopMap> {
   List<Polyline<Object>> _polylines = [];
   late LatLng? _currentLocation;
   bool _findingRoute = false;
+  AlignOnUpdate _alignPositionOnUpdate = AlignOnUpdate.once;
+  late StreamController<double?> _followCurrentLocationStreamController;
 
   Future<void> _loadPoopLocations() async {
     try {
@@ -61,6 +63,7 @@ class _MapState extends State<PoopMap> {
     setState(() {
       _findingRoute = true;
     });
+    _goToCurrentLocation();
     ClosestPoopLocation? closestPoopLocation = await getClosestPoopLocation(
         widget.config, _currentLocation!.latitude, _currentLocation!.longitude);
     if (closestPoopLocation != null) {
@@ -73,6 +76,20 @@ class _MapState extends State<PoopMap> {
     // stop loading once everything returns, no matter what
     setState(() {
       _findingRoute = false;
+    });
+  }
+
+  void _goToCurrentLocation() {
+    setState(() {
+        _alignPositionOnUpdate = AlignOnUpdate.always;
+    });
+    _followCurrentLocationStreamController.add(18);
+    _alignPositionOnUpdate = AlignOnUpdate.never;
+  }
+
+  void _clearNavigation() {
+    setState(() {
+      _polylines = [];
     });
   }
 
@@ -90,12 +107,14 @@ class _MapState extends State<PoopMap> {
       }
     });
 
+    _followCurrentLocationStreamController = StreamController<double?>();
     super.initState();
   }
 
   @override
   void dispose() {
     _positionSubscription?.cancel();
+    _followCurrentLocationStreamController.close();
     super.dispose();
   }
 
@@ -119,16 +138,12 @@ class _MapState extends State<PoopMap> {
           },
         ),
         children: [
-          // in the future these can become their own widgets if they grow
           TileLayer(
-            // Display map tiles from any source
-            urlTemplate:
-                'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // OSMF's Tile Server
+            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
             userAgentPackageName: 'com.example.app',
-            maxNativeZoom:
-                19, // Scale tiles when the server doesn't support higher zoom levels
+            maxNativeZoom: 19,
           ),
-          CurrentLocationLayer(alignPositionOnUpdate: AlignOnUpdate.once),
+          CurrentLocationLayer(alignPositionOnUpdate: _alignPositionOnUpdate, alignPositionStream: _followCurrentLocationStreamController.stream,),
           MarkerLayer(markers: _createMarkersFromPoopLocations()),
           PolylineLayer(polylines: _polylines),
           RichAttributionWidget(attributions: [
@@ -144,11 +159,26 @@ class _MapState extends State<PoopMap> {
         const Loading(
             loadingMessage:
                 "determining route to closest poop location. this can take a minute..."),
+      _polylines.isEmpty
+        ? Align(
+          alignment: Alignment.bottomLeft,
+          child: FloatingActionButton(
+            onPressed: _navigateFromCurrentLocation,
+            child: const Icon(Icons.navigation_rounded),
+          ),
+        )
+        : Align(
+            alignment: Alignment.bottomLeft,
+            child: FloatingActionButton(
+              onPressed: _clearNavigation,
+              child: const Icon(Icons.clear),
+            ),
+          ),
       Align(
-        alignment: Alignment.bottomLeft,
+        alignment: Alignment.centerLeft,
         child: FloatingActionButton(
-          onPressed: _navigateFromCurrentLocation,
-          child: const Icon(Icons.navigation_rounded),
+          onPressed: _goToCurrentLocation,
+          child: const Icon(Icons.my_location),
         ),
       ),
       const Align(
