@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -40,7 +39,7 @@ func createDatabaseFile(dbPath string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("Database file created at:", dbPath)
+	slog.Debug("Database file created at: " + dbPath)
 	return nil
 }
 

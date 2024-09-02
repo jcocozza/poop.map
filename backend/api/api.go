@@ -23,8 +23,8 @@ func Serve(appState *AppState) {
 	handler := c.Handler(mux)
 
 	port := fmt.Sprintf(":%s", appState.Cfg.BackendPort)
-	fmt.Printf("Starting server on port %s...\n", port)
+	appState.Logger.Info(fmt.Sprintf("Starting server on port %s...\n", port))
 	if err := http.ListenAndServe(port, handler); err != nil {
-		fmt.Printf("Server failed to start: %v\n", err)
+		appState.Logger.Error(fmt.Sprintf("Server failed to start: %v\n", err))
 	}
 }

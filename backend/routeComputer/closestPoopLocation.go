@@ -10,11 +10,9 @@ import (
 
 func computeClosestPoopLocation(currLat, currLong float64, poopLocations []model.PoopLocation) model.PoopLocation {
 	smallestDist := 0.0
-
 	var closestPoopLocation model.PoopLocation
 	for i, poopLocation := range poopLocations {
 		haversineDist := haversine(currLat, currLong, poopLocation.Latitude, poopLocation.Longitude)
-
 		// why am i so lazy
 		if i == 0 {
 			smallestDist = haversineDist
@@ -32,9 +30,7 @@ func GetClosestPoopLocationAndRoute(ctx context.Context, currLat, currLong float
 	if err != nil {
 		return model.PoopLocation{}, "", err
 	}
-
 	closestPoopLocation := computeClosestPoopLocation(currLat, currLong, poopLocations)
-
 	route, err := GetRoute(currLat, currLong, closestPoopLocation.Latitude, closestPoopLocation.Longitude)
 	if err != nil {
 		return closestPoopLocation, route, fmt.Errorf("error computing route. try again later. %w", err)
