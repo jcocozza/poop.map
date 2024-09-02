@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:poop_map/model/poop_location.dart';
 import 'package:poop_map/utils/read_config.dart';
+import 'package:poop_map/logging/log.dart';
 
 class ClosestPoopLocation {
   PoopLocation poopLocation;
@@ -20,22 +21,20 @@ class ClosestPoopLocation {
 /// Call the api to get the closest poop location and the route to it
 Future<ClosestPoopLocation?> getClosestPoopLocation(Config cfg, double currLat, double currLong) async {
   final baseUrl = '${cfg.backendUrl}/api/closest';
-  String params = "?latitude=${currLat}&longitude=${currLong}";
+  String params = "?latitude=$currLat&longitude=$currLong";
   final url = Uri.parse("$baseUrl$params");
   try {
     final response = await http.get(url);
     if (response.statusCode == 200) {
       final decodedResponse = json.decode(response.body);
-      print(decodedResponse);
       ClosestPoopLocation cp = ClosestPoopLocation(PoopLocation.fromJson(decodedResponse['poop_location']), decodedResponse['route'] as String);
-      print(cp);
       return cp;
     } else {
-      print('Request failed with status: ${response.statusCode}');
+      logger.warning('Request failed with status: ${response.statusCode}');
       return null;
     }
   } catch (e) {
-    print('Error: $e');
+    logger.warning('Error: $e');
     return null;
   }
 }
@@ -55,12 +54,12 @@ Future<void> insertPoopLocation(Config cfg, PoopLocation poopLocation) async {
       body: jsonBody,
     );
     if (response.statusCode == 201) {
-      print('Response data: ${response.body}');
+      logger.info('Response data: ${response.body}');
     } else {
-      print('Failed to send request: ${response.statusCode}');
+      logger.severe('Failed to send request: ${response.statusCode}');
     }
   } catch (e) {
-    print('Error: $e');
+    logger.severe('Error: $e');
   }
 }
 
@@ -84,11 +83,11 @@ Future<List<PoopLocation>> getAllPoopLocations(Config cfg) async {
         );
       }).toList();
     } else {
-      print('Request failed with status: ${response.statusCode}');
+      logger.severe('Request failed with status: ${response.statusCode}');
       return [];
     }
   } catch (e) {
-    print('Error: $e');
+    logger.severe('Error: $e');
     return [];
   }
 }

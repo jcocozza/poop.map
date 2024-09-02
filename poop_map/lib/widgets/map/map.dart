@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:poop_map/logging/log.dart';
 import 'package:poop_map/model/poop_location.dart';
 import 'package:poop_map/requests/requests.dart';
 import 'package:poop_map/utils/unpack_polyline.dart';
@@ -41,11 +42,10 @@ class _MapState extends State<PoopMap> {
       final locations = await getAllPoopLocations(widget.config);
       setState(() {
         _poopLocations = locations;
-        print("poop locations set!");
-        print(_poopLocations);
+        logger.info("poop locations loaded and set");
       });
     } catch (e) {
-      print('Error loading poop locations: $e');
+      logger.severe('Error loading poop locations: $e');
     }
   }
 

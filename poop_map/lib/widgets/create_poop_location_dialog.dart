@@ -94,8 +94,10 @@ class _PoopLocationDialogState extends State<PoopLocationDialog> {
                 notes,
               );
               await insertPoopLocation(widget.cfg, pl);
-              Navigator.of(context).pop();
-              widget.onPoopLocationAdd(pl);
+              if (context.mounted) {
+                Navigator.of(context).pop();
+                widget.onPoopLocationAdd(pl);
+              }
             }
           },
         )

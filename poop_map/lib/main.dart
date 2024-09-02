@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:poop_map/utils/read_config.dart';
 import 'package:poop_map/widgets/map/map.dart';
+import 'package:poop_map/logging/log.dart';
 
 const String appConfigAsset = "../config.json";
 
@@ -12,12 +13,13 @@ Future<Config> loadConfig() async {
     final String configContent = await rootBundle.loadString(appConfigAsset);
     return parseConfig(configContent);
   } catch (e) {
-    print('Error loading config: $e');
+    logger.severe('Error loading config: $e');
     rethrow;
   }
 }
 
 void main() async {
+  setUpLogging();
   WidgetsFlutterBinding.ensureInitialized();
   final config = await loadConfig();
   runApp(App(config: config,));
