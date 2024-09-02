@@ -2,5 +2,10 @@
     "backend_url": "http://localhost",
     "backend_port": "8080",
     "frontend_url": "http://localhost",
-    "frontend_port": "8000"
+    "frontend_port": "8000",
+
+    "android_admob_app_id": "ca-app-pub-3940256099942544~3347511713",
+    "android_banner": "ca-app-pub-3940256099942544/6300978111",
+    "ios_admob_app_id": "ca-app-pub-3940256099942544~3347511713",
+    "ios_banner": "ca-app-pub-3940256099942544/6300978111"
 }

@@ -20,8 +20,11 @@ Future<Config> loadConfig() async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final config = await loadConfig();
-  runApp(App(config: config,));
+  runApp(App(
+    config: config,
+  ));
 }
+
 class App extends StatelessWidget {
   final Config config;
   const App({super.key, required this.config});
@@ -34,7 +37,10 @@ class App extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: Home (title: 'click to add a poop location', config: config,),
+      home: Home(
+        title: 'click to add a poop location',
+        config: config,
+      ),
     );
   }
 }
@@ -58,10 +64,7 @@ class _HomeState extends State<Home> {
           title: Text(widget.title),
         ),
         */
-        body: Stack(
-          children: [
-            PoopMap(config: widget.config),
-          ],
-        ));
-  }
+        body: PoopMap(config: widget.config),
+    );
+}
 }
