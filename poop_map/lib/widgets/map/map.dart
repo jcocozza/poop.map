@@ -81,7 +81,7 @@ class _MapState extends State<PoopMap> {
 
   void _goToCurrentLocation() {
     setState(() {
-        _alignPositionOnUpdate = AlignOnUpdate.always;
+      _alignPositionOnUpdate = AlignOnUpdate.always;
     });
     _followCurrentLocationStreamController.add(18);
     _alignPositionOnUpdate = AlignOnUpdate.never;
@@ -143,7 +143,10 @@ class _MapState extends State<PoopMap> {
             userAgentPackageName: 'com.example.app',
             maxNativeZoom: 19,
           ),
-          CurrentLocationLayer(alignPositionOnUpdate: _alignPositionOnUpdate, alignPositionStream: _followCurrentLocationStreamController.stream,),
+          CurrentLocationLayer(
+            alignPositionOnUpdate: _alignPositionOnUpdate,
+            alignPositionStream: _followCurrentLocationStreamController.stream,
+          ),
           MarkerLayer(markers: _createMarkersFromPoopLocations()),
           PolylineLayer(polylines: _polylines),
           RichAttributionWidget(attributions: [
@@ -159,28 +162,31 @@ class _MapState extends State<PoopMap> {
         const Loading(
             loadingMessage:
                 "determining route to closest poop location. this can take a minute..."),
-      _polylines.isEmpty
-        ? Align(
-          alignment: Alignment.bottomLeft,
-          child: FloatingActionButton(
-            onPressed: _navigateFromCurrentLocation,
-            child: const Icon(Icons.navigation_rounded),
-          ),
-        )
-        : Align(
-            alignment: Alignment.bottomLeft,
-            child: FloatingActionButton(
-              onPressed: _clearNavigation,
-              child: const Icon(Icons.clear),
-            ),
-          ),
       Align(
-        alignment: Alignment.centerLeft,
-        child: FloatingActionButton(
-          onPressed: _goToCurrentLocation,
-          child: const Icon(Icons.my_location),
-        ),
-      ),
+          alignment: Alignment.bottomCenter,
+          child: BottomAppBar(
+              color: Theme.of(context).colorScheme.inversePrimary,
+              child: Row(children: [
+                const Text("click to add/view a poop location"),
+                const Spacer(),
+                _polylines.isEmpty
+                    ? IconButton(
+                        onPressed: _navigateFromCurrentLocation,
+                        icon: const Icon(Icons.navigation_rounded),
+                        tooltip:
+                            'Navigate to nearest poop location from current location',
+                      )
+                    : IconButton(
+                        onPressed: _clearNavigation,
+                        icon: const Icon(Icons.clear),
+                        tooltip: 'clear navigational route',
+                      ),
+                IconButton(
+                  onPressed: _goToCurrentLocation,
+                  icon: const Icon(Icons.my_location),
+                  tooltip: 'go to current location',
+                ),
+              ]))),
       const Align(
         alignment: Alignment.topRight,
         child: Padding(
