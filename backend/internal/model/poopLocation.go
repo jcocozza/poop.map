@@ -74,4 +74,6 @@ type PoopLocation struct {
 	Seasonal     bool         `json:"seasonal"`
 	Seasons      []Season     `json:"seasons"`
 	Accessible   bool         `json:"accessible"`
+	Upvotes      int          `json:"upvotes"`
+	DownVotes    int          `json:"downvotes"`
 }

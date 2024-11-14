@@ -8,4 +8,6 @@ type Review struct {
 	Rating           int       `json:"rating"`
 	Comment          string    `json:"comment"`
 	Time             time.Time `json:"time"`
+	Upvotes          int       `json:"upvotes"`
+	DownVotes        int       `json:"downvotes"`
 }
