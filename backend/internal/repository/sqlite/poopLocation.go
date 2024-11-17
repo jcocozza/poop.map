@@ -23,8 +23,8 @@ func NewSQLitePoopLocationRepository(db *sql.DB, logger *slog.Logger) *SQLitePoo
 
 func (splr *SQLitePoopLocationRepository) Create(ctx context.Context, pl model.PoopLocation) error {
 	sql := `
-INSERT INTO poop_location 
-(uuid, name, latitude, longitude, first_created, last_modified, seasonal, seasons_mask, accessible, upvotes, downvotes) 
+INSERT INTO poop_location
+(uuid, name, latitude, longitude, first_created, last_modified, seasonal, seasons_mask, accessible, upvotes, downvotes)
 VALUES
 (?,?,?,?,?,?,?,?,?,?,?)
 `
