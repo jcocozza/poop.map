@@ -60,6 +60,9 @@ func SeasonMask(seasons []Season) int {
 			total += spring
 		}
 	}
+	if total > 15 || total < 0 {
+		panic("unexpected world state. mask can never be > 15 or < 0")
+	}
 	return total
 }
 

@@ -17,7 +17,7 @@ type SQLiteReviewRepository struct {
 func NewSQLiteReviewRepository(db *sql.DB, logger *slog.Logger) *SQLiteReviewRepository {
 	return &SQLiteReviewRepository{
 		db:     db,
-		logger: logger,
+		logger: logger.WithGroup("review repo"),
 	}
 }
 
@@ -67,7 +67,7 @@ WHERE poop_location_uuid = ?;
 			&review.UUID,
 			&review.Rating,
 			&review.Comment,
-			timeStr,
+			&timeStr,
 			&review.Upvotes,
 			&review.DownVotes,
 		)
@@ -90,13 +90,13 @@ func (srr *SQLiteReviewRepository) Update(ctx context.Context, review model.Revi
 }
 
 func (srr *SQLiteReviewRepository) Upvote(ctx context.Context, UUID string) error {
-	sql := "UPDATE reivew SET upvotes = upvotes + 1 WHERE uuid = ?;"
+	sql := "UPDATE review SET upvotes = upvotes + 1 WHERE uuid = ?;"
 	_, err := srr.db.ExecContext(ctx, sql, UUID)
 	return err
 }
 
 func (srr *SQLiteReviewRepository) Downvote(ctx context.Context, UUID string) error {
-	sql := "UPDATE reivew SET downvotes = downvotes + 1 WHERE uuid = ?;"
+	sql := "UPDATE review SET downvotes = downvotes + 1 WHERE uuid = ?;"
 	_, err := srr.db.ExecContext(ctx, sql, UUID)
 	return err
 }

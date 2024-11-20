@@ -17,7 +17,7 @@ type SQLitePoopLocationRepository struct {
 func NewSQLitePoopLocationRepository(db *sql.DB, logger *slog.Logger) *SQLitePoopLocationRepository {
 	return &SQLitePoopLocationRepository{
 		db:     db,
-		logger: logger,
+		logger: logger.WithGroup("poop location repo"),
 	}
 }
 
@@ -56,7 +56,7 @@ SELECT
 	latitude,
 	longitude,
 	first_created,
-	last_created,
+	last_modified,
 	seasonal,
 	seasons_mask,
 	accessible,
@@ -81,6 +81,7 @@ FROM poop_location
 			&poopLocation.Longitude,
 			&firstCreatedStr,
 			&lastModifiedStr,
+			&poopLocation.Seasonal,
 			&seasonsMask,
 			&poopLocation.Accessible,
 			&poopLocation.Upvotes,

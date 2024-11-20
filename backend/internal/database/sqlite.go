@@ -4,10 +4,16 @@ import (
 	"database/sql"
 	"os"
 	"path/filepath"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type SQLiteDB struct {
 	Path string
+}
+
+func NewSQLiteDB(path string) *SQLiteDB {
+	return &SQLiteDB{Path: path}
 }
 
 // create a database file path
@@ -37,26 +43,24 @@ func (s *SQLiteDB) connect() *sql.DB {
 
 // create a database
 func (s *SQLiteDB) Connect() *sql.DB {
-	//alreadyExisted := true
+	alreadyExisted := true
 	if _, err := os.Stat(s.Path); os.IsNotExist(err) {
-		//alreadyExisted = false
+		alreadyExisted = false
 		s.createDatabaseFile()
 	}
 	db := s.connect()
-	/*
 	if !alreadyExisted {
-		schemaPath := "core/sql/schema.sql"
-		s.logger.Info("running schema creation")
+		schemaPath := "/Users/josephcocozza/Repositories/poop.map/backend/schema/schema.sql"
+		//s.logger.Info("running schema creation")
 		file, err := os.ReadFile(schemaPath)
 		if err != nil {
 			panic(err) // schema should always be there
 		}
 		sql := string(file)
-		err = d.Execute(context.TODO(), sql)
+		_, err = db.Exec(sql)
 		if err != nil {
 			panic(err)
 		}
 	}
-	*/
 	return db
 }
