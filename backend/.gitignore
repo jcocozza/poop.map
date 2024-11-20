@@ -1,2 +1,2 @@
-backend
-poop_locations_database.db
+*.log
+*.db
