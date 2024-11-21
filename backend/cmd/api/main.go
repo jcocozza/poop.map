@@ -13,7 +13,8 @@ import (
 
 func main() {
 	lggr := logger.CreateLogger(slog.LevelDebug, config.Prod)
-	r, _ := internal.SetupAPI(lggr, config.Prod)
+	cfg := config.ReadConfig("../../config.json", lggr)
+	r, _ := internal.SetupAPI(lggr, cfg)
 	lggr.Info("running on 8111")
 	if err := http.ListenAndServe(":8111", r); err != nil {
 		panic(err)

@@ -13,8 +13,7 @@ import (
 	"github.com/jcocozza/poop.map/backend/internal/service"
 )
 
-func SetupAPI(lggr *slog.Logger, env config.Environment) (http.Handler, *sql.DB) {
-	cfg := config.ReadConfig(lggr, env)
+func SetupAPI(lggr *slog.Logger, cfg config.Config) (http.Handler, *sql.DB) {
 	db := database.NewSQLiteDB(cfg.DatabasePath).Connect()
 	plr := sqlite.NewSQLitePoopLocationRepository(db, lggr)
 	rr := sqlite.NewSQLiteReviewRepository(db, lggr)

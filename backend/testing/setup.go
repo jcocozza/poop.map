@@ -12,7 +12,8 @@ import (
 
 func SetupTest() *httptest.Server {
 	lggr := logger.CreateLogger(slog.LevelDebug, config.Test)
-	r, db := internal.SetupAPI(lggr, config.Test)
+	cfg := config.ReadConfig("../../config_test.json", lggr)
+	r, db := internal.SetupAPI(lggr, cfg)
 
 	// read in test sql
 	sqlbytes, err := os.ReadFile("test_locations.sql")
