@@ -24,13 +24,14 @@ func NewSQLitePoopLocationRepository(db *sql.DB, logger *slog.Logger) *SQLitePoo
 func (splr *SQLitePoopLocationRepository) Create(ctx context.Context, pl model.PoopLocation) error {
 	sql := `
 INSERT INTO poop_location
-(uuid, name, latitude, longitude, first_created, last_modified, seasonal, seasons_mask, accessible, upvotes, downvotes)
+(uuid, name, location_type, latitude, longitude, first_created, last_modified, seasonal, seasons_mask, accessible, upvotes, downvotes)
 VALUES
-(?,?,?,?,?,?,?,?,?,?,?)
+(?,?,?,?,?,?,?,?,?,?,?,?)
 `
 	_, err := splr.db.ExecContext(ctx, sql,
 		pl.UUID,
 		pl.Name,
+		pl.LocationType,
 		pl.Latitude,
 		pl.Longitude,
 		timeToString(pl.FirstCreated),
@@ -53,6 +54,7 @@ func (splr *SQLitePoopLocationRepository) ReadAll(ctx context.Context) ([]model.
 SELECT
 	uuid,
 	name,
+	location_type,
 	latitude,
 	longitude,
 	first_created,
@@ -77,6 +79,7 @@ FROM poop_location
 		err := rows.Scan(
 			&poopLocation.UUID,
 			&poopLocation.Name,
+			&poopLocation.LocationType,
 			&poopLocation.Latitude,
 			&poopLocation.Longitude,
 			&firstCreatedStr,

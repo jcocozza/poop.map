@@ -3,6 +3,7 @@ CREATE TABLE poop_location (
     name TEXT NOT NULL,
     latitude REAL,
     longitude REAL,
+    location_type TEXT,
     first_created TEXT,
     last_modified TEXT,
     seasonal BOOLEAN,
