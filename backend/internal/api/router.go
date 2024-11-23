@@ -35,8 +35,8 @@ func NewRouter(
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"}, // TODO: Limit this to only the web server
 		AllowCredentials: true,
-		AllowedMethods:   []string{"GET", "POST", "PATCH", "DELETE"},
-		AllowedHeaders:   []string{"Content-Type", "Authorization", "X-User-UUID"},
+		AllowedMethods:   []string{"GET", "POST", "PATCH", "DELETE", "PUT"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization"},
 	})
 	final := c.Handler(loggedMux)
 	return final
