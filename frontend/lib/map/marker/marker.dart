@@ -39,6 +39,7 @@ class _MarkerInfoDialogState extends State<MarkerInfoDialog> {
         ],
       ),
       content: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             'Votes: ${widget.poopLocation.downvotes}',
