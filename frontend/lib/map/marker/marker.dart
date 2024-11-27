@@ -34,26 +34,36 @@ class _MarkerInfoDialogState extends State<MarkerInfoDialog> {
     return AlertDialog(
       title: Column(
         children: [
-          Text(
-              '${widget.poopLocation.locationType} ${widget.poopLocation.name}')
+          Text(widget.poopLocation.name),
         ],
       ),
-      content: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      content: Column(
         children: [
-          Text(
-            'Votes: ${widget.poopLocation.downvotes}',
+          if (widget.poopLocation.seasonal)
+            const Text(
+                "This location is seasonal, it might only be open during the following seasons:"),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: widget.poopLocation.seasonsIcons(),
           ),
-          IconButton(
-            icon: const Icon(Icons.arrow_downward),
-            onPressed: () => downvoter(),
-          ),
-          Text(
-            'Votes: ${widget.poopLocation.upvotes}',
-          ),
-          IconButton(
-            icon: const Icon(Icons.arrow_upward),
-            onPressed: () => upvoter(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Votes: ${widget.poopLocation.downvotes}',
+              ),
+              IconButton(
+                icon: const Icon(Icons.arrow_downward),
+                onPressed: () => downvoter(),
+              ),
+              Text(
+                'Votes: ${widget.poopLocation.upvotes}',
+              ),
+              IconButton(
+                icon: const Icon(Icons.arrow_upward),
+                onPressed: () => upvoter(),
+              ),
+            ],
           ),
         ],
       ),

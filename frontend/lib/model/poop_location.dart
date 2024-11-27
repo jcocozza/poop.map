@@ -48,6 +48,19 @@ class PoopLocation {
         return Colors.blue;
     }
   }
+
+  List<Widget> seasonsIcons() {
+    Map<String, Widget> seasonsMap = {
+      "summer": const Column(children: [Icon(Icons.sunny), Text("summer")]),
+      "spring": const Column(children: [Icon(Icons.eco), Text("spring")]),
+      "winter": const Column(children: [Icon(Icons.ac_unit), Text("winter")]),
+      "fall": const Column(children: [Icon(Icons.nature), Text("fall")]),
+    };
+    return seasons
+        .map((season) => seasonsMap[season] ?? const Icon(Icons.help_outline))
+        .toList();
+  }
+
   // A method to convert the PoopLocation instance to JSON
   Map<String, dynamic> toJson() {
     return {

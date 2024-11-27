@@ -46,22 +46,43 @@ class _PoopLocationDialogState extends State<PoopLocationDialog> {
                 controller: nameController,
                 decoration: const InputDecoration(labelText: 'Name'),
               ),
-              DropdownButton(
-                value: locationType,
-                items:
-                    ["regular", "porta potty", "outhouse", "other"].map((loc) {
-                  return DropdownMenuItem(
-                    value: loc,
-                    child: Text(loc),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    locationType = newValue!;
-                  });
-                },
-              ),
               Row(
+                children: [
+                  DropdownMenu<String>(
+                    initialSelection: "regular",
+                    onSelected: (String? newValue) {
+                      setState(() {
+                        locationType = newValue!;
+                      });
+                    },
+                    dropdownMenuEntries: [
+                      "regular",
+                      "porta potty",
+                      "outhouse",
+                      "other"
+                    ].map((loc) {
+                      return DropdownMenuEntry(
+                        value: loc,
+                        label: loc,
+                      );
+                    }).toList(),
+                  ),
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: accessible,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            accessible = value!;
+                          });
+                        },
+                      ),
+                      const Icon(Icons.accessible),
+                    ],
+                  ),
+                ],
+              ),
+              Column(
                 children: [
                   Center(
                     child: Row(children: [
@@ -78,10 +99,11 @@ class _PoopLocationDialogState extends State<PoopLocationDialog> {
                   ),
                   if (seasonal)
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         Column(
                           children: [
-                            const Text("Summer"),
+                            const Text("summer"),
                             Checkbox(
                               value: seasons['summer'],
                               onChanged: (bool? value) {
@@ -135,19 +157,6 @@ class _PoopLocationDialogState extends State<PoopLocationDialog> {
                     )
                 ],
               ),
-              Row(
-                children: [
-                  const Icon(Icons.accessible),
-                  Checkbox(
-                    value: accessible,
-                    onChanged: (bool? value) {
-                      setState(() {
-                        accessible = value!;
-                      });
-                    },
-                  ),
-                ],
-              ),
             ],
           ),
         ),
@@ -163,7 +172,10 @@ class _PoopLocationDialogState extends State<PoopLocationDialog> {
           child: const Text('Add'),
           onPressed: () async {
             final name = nameController.text;
-            List<String> selectedSeasons = seasons.entries.where((entry) => entry.value).map((entry) => entry.key).toList();
+            List<String> selectedSeasons = seasons.entries
+                .where((entry) => entry.value)
+                .map((entry) => entry.key)
+                .toList();
             PoopLocation pl = PoopLocation(
               uuid: '',
               name: name,
