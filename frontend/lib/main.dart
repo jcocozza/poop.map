@@ -34,15 +34,15 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  int _counter = 0;
+  //int _counter = 0;
 
-  void _incrementCounter() {
-    print("INCREMENTING THE COUNTER");
-    backendStatus();
-    setState(() {
-      _counter++;
-    });
-  }
+  //void _incrementCounter() {
+  //  print("INCREMENTING THE COUNTER");
+  //  backendStatus();
+  //  setState(() {
+  //    _counter++;
+  //  });
+  //}
 
   @override
   Widget build(BuildContext context) {
@@ -55,12 +55,12 @@ class _HomeState extends State<Home> {
         children: [
           MapWidget(),
         ],
-        ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
+      //floatingActionButton: FloatingActionButton(
+      //  onPressed: _incrementCounter,
+      //  tooltip: 'Increment',
+      //  child: const Icon(Icons.add),
+      //), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
