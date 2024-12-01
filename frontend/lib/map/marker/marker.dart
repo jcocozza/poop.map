@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:frontend/model/poop_location.dart';
 import 'package:frontend/requests/poop_locations.dart';
+import 'package:frontend/reviews/reviews.dart';
 
 class MarkerInfoDialog extends StatefulWidget {
   final PoopLocation poopLocation;
