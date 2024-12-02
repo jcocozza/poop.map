@@ -74,12 +74,16 @@ class ReviewList extends StatefulWidget {
 class _ReviewListState extends State<ReviewList> {
   List<Review> reviewList = [];
 
-  @override
-  Future<void> initState() async {
-    final reviews = await getAllReviewsByPoopLocation(widget.poopLocationUUID);
-    setState(() {
-      reviewList = reviews;
+  Future<void> _loadReviews() async {
+    final reviews = getAllReviewsByPoopLocation(widget.poopLocationUUID);
+    setState(() async {
+      reviewList = await reviews;
     });
+  }
+
+  @override
+  void initState() {
+    _loadReviews();
     super.initState();
   }
 

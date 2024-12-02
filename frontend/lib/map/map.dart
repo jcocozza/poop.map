@@ -33,9 +33,16 @@ class _MapWidgetState extends State<MapWidget> {
         .toList();
   }
 
-  @override
-  Future<void> initState() async {
+  Future<void> _loadPoopLocations() async {
     final locs = await getAllPoopLocations();
+    setState(() {
+      poopLocations = locs;
+    });
+  }
+
+  @override
+  void initState() {
+    _loadPoopLocations();
     const factory = LocationMarkerDataStreamFactory();
     positionStream = factory.fromGeolocatorPositionStream().asBroadcastStream();
     positionSubscription = positionStream.listen((position) {
@@ -43,9 +50,6 @@ class _MapWidgetState extends State<MapWidget> {
     });
 
     followCurrentLocationStreamController = StreamController<double?>();
-    setState(() {
-      poopLocations = locs;
-    });
     super.initState();
   }
 
