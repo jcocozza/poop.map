@@ -66,6 +66,7 @@ class _MarkerInfoDialogState extends State<MarkerInfoDialog> {
               ),
             ],
           ),
+          ReviewList(poopLocationUUID: widget.poopLocation.uuid,),
         ],
       ),
       actions: <Widget>[

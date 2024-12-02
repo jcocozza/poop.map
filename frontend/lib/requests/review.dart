@@ -3,18 +3,20 @@ import 'package:frontend/model/review.dart';
 import 'package:http/http.dart' as http;
 import 'package:frontend/requests/api.dart';
 
-Future<List<Review>> getAllViewsByPoopLocation(String poopLocationUUID) async {
+Future<List<Review>> getAllReviewsByPoopLocation(String poopLocationUUID) async {
   final url = createURL("/poop-location/$poopLocationUUID/review");
   Map<String, String> headers = {
     'Authorization': getAPIKey(),
   };
   final response = await http.get(url, headers: headers);
   if (response.statusCode == 200) {
+    print(response.body);
     final decodedRespose = json.decode(response.body);
     List<Review> lst =
         decodedRespose['data'].map((js) => Review.fromJson(js)).toList();
     return lst;
   } else {
+    print(response.body);
     return [];
   }
 }

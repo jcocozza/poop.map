@@ -61,12 +61,10 @@ class _ReviewViewerState extends State<ReviewViewer> {
 
 class ReviewList extends StatefulWidget {
   final String poopLocationUUID;
-  final List<Review> reviewList;
 
   const ReviewList({
     super.key,
     required this.poopLocationUUID,
-    required this.reviewList,
   });
 
   @override
@@ -74,14 +72,27 @@ class ReviewList extends StatefulWidget {
 }
 
 class _ReviewListState extends State<ReviewList> {
+  List<Review> reviewList = [];
+
+  @override
+  Future<void> initState() async {
+    final reviews = await getAllReviewsByPoopLocation(widget.poopLocationUUID);
+    setState(() {
+      reviewList = reviews;
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
-        children: widget.reviewList.map((review) {
-          return ReviewViewer(review: review,);
+        children: reviewList.map((review) {
+          return ReviewViewer(
+            review: review,
+          );
         }).toList(),
-        ),
-      );
+      ),
+    );
   }
 }
