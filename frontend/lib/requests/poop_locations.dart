@@ -8,15 +8,21 @@ Future<List<PoopLocation>> getAllPoopLocations() async {
   Map<String, String> headers = {
     'Authorization': getAPIKey(),
   };
-  final response = await http.get(url, headers: headers);
-  if (response.statusCode == 200) {
-    final decodedRespose = json.decode(response.body);
-    List<PoopLocation> lst =
-        decodedRespose['data'].map((js) => PoopLocation.fromJson(js)).toList();
-    return lst;
-  } else {
-    return [];
+  try {
+    final response = await http.get(url, headers: headers);
+    if (response.statusCode == 200) {
+      final decodedRespose = json.decode(response.body);
+      List<PoopLocation> lst = (decodedRespose['data'] as List<dynamic>)
+          .map((js) => PoopLocation.fromJson(js as Map<String, dynamic>))
+          .toList();
+      return lst;
+    } else {
+      print(response.body);
+    }
+  } catch (error) {
+    print(error);
   }
+  return [];
 }
 
 Future<void> createPoopLocation(PoopLocation poopLocation) async {

@@ -75,9 +75,9 @@ class _ReviewListState extends State<ReviewList> {
   List<Review> reviewList = [];
 
   Future<void> _loadReviews() async {
-    final reviews = getAllReviewsByPoopLocation(widget.poopLocationUUID);
-    setState(() async {
-      reviewList = await reviews;
+    final reviews = await getAllReviewsByPoopLocation(widget.poopLocationUUID);
+    setState(() {
+      reviewList = reviews;
     });
   }
 

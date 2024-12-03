@@ -89,7 +89,7 @@ class PoopLocation {
       lastModified: json['last_modified'],
       locationType: json['location_type'],
       seasonal: json['seasonal'],
-      seasons: json['seasons'],
+      seasons: (json['seasons'] as List<dynamic>).map((e) => e as String).toList(),
       accessible: json['accessible'],
       upvotes: json['upvotes'],
       downvotes: json['downvotes'],

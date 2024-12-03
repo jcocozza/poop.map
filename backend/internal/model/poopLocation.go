@@ -30,7 +30,7 @@ const (
 
 // map the number (in binary) to a list of seasons
 func GetSeasons(mask int) []Season {
-	var seasons []Season
+	var seasons []Season = []Season{}
 	if mask&summer != 0 {
 		seasons = append(seasons, Summer)
 	}

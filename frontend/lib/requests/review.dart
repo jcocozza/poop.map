@@ -3,22 +3,27 @@ import 'package:frontend/model/review.dart';
 import 'package:http/http.dart' as http;
 import 'package:frontend/requests/api.dart';
 
-Future<List<Review>> getAllReviewsByPoopLocation(String poopLocationUUID) async {
+Future<List<Review>> getAllReviewsByPoopLocation(
+    String poopLocationUUID) async {
   final url = createURL("/poop-location/$poopLocationUUID/review");
   Map<String, String> headers = {
     'Authorization': getAPIKey(),
   };
-  final response = await http.get(url, headers: headers);
-  if (response.statusCode == 200) {
-    print(response.body);
-    final decodedRespose = json.decode(response.body);
-    List<Review> lst =
-        decodedRespose['data'].map((js) => Review.fromJson(js)).toList();
-    return lst;
-  } else {
-    print(response.body);
-    return [];
+  try {
+    final response = await http.get(url, headers: headers);
+    if (response.statusCode == 200) {
+      final decodedRespose = json.decode(response.body);
+      List<Review> lst = (decodedRespose['data'] as List<dynamic>)
+          .map((js) => Review.fromJson(js as Map<String, dynamic>))
+          .toList();
+      return lst;
+    } else {
+      print(response.body);
+    }
+  } catch (error) {
+    print(error);
   }
+  return [];
 }
 
 Future<void> createReview(String poopLocationUUID, Review review) async {
@@ -28,7 +33,6 @@ Future<void> createReview(String poopLocationUUID, Review review) async {
   };
 
   final json = jsonEncode(review.toJson());
-
   final response = await http.put(url, headers: headers, body: json);
   if (response.statusCode == 201) {
     return;
